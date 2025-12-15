@@ -1,0 +1,400 @@
+/* Login.css - Matching Signup Page Style */
+
+/* ===== CSS VARIABLES FOR THEME SWITCHING ===== */
+:root {
+    /* Light Theme Variables */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f5f5f5;
+    --text-primary: #000000;
+    --text-secondary: #333333;
+    --accent-color: #ff0000;
+    --card-bg: #ffffff;
+    --border-color: #e0e0e0;
+    --navbar-bg: #ffffff;
+    --footer-bg: #111111;
+    --footer-text: #ffffff;
+    --hero-bg: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+    --hero-text: #000000;
+    --btn-primary-bg: #000000;
+    --btn-primary-text: #ffffff;
+    --btn-outline-border: #000000;
+    --btn-outline-text: #000000;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] {
+    /* Dark Theme Variables */
+    --bg-primary: #121212;
+    --bg-secondary: #1e1e1e;
+    --text-primary: #ffffff;
+    --text-secondary: #cccccc;
+    --accent-color: #ff3333;
+    --card-bg: #1e1e1e;
+    --border-color: #333333;
+    --navbar-bg: #121212;
+    --footer-bg: #000000;
+    --footer-text: #ffffff;
+    --hero-bg: linear-gradient(135deg, #1e1e1e 0%, #121212 100%);
+    --hero-text: #ffffff;
+    --btn-primary-bg: #ffffff;
+    --btn-primary-text: #000000;
+    --btn-outline-border: #ffffff;
+    --btn-outline-text: #ffffff;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-100px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* ===== LOGIN PAGE STYLES ===== */
+.login-page {
+    min-height: 100vh;
+    background: var(--hero-bg);
+    background-size: 400% 400%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding: 20px;
+    position: relative;
+}
+
+/* Theme Toggle Button */
+.theme-toggle-signup-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: transparent;
+    border: 2px solid var(--border-color);
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px var(--shadow-color);
+    animation: float 3s ease-in-out infinite;
+    z-index: 100;
+}
+
+.theme-toggle-signup-btn:hover {
+    border-color: var(--accent-color);
+    transform: rotate(15deg);
+    background-color: rgba(255, 0, 0, 0.1);
+}
+
+/* Back to Home Link */
+.back-to-home {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    z-index: 100;
+}
+
+.back-to-home:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+/* Login Card */
+.signup-card {
+    background-color: var(--card-bg);
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 15px 35px var(--shadow-color);
+    width: 100%;
+    max-width: 450px;
+    border: 1px solid var(--border-color);
+    animation: fadeInUp 0.8s ease-out;
+    position: relative;
+    overflow: hidden;
+}
+
+.signup-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background-color: var(--accent-color);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.signup-card:hover::before {
+    transform: scaleX(1);
+}
+
+/* Logo */
+.signup-logo {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.signup-logo .logo-text {
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: var(--text-primary);
+    letter-spacing: 1px;
+    position: relative;
+    display: inline-block;
+    animation: float 3s ease-in-out infinite;
+}
+
+.signup-logo .logo-text::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background-color: var(--accent-color);
+}
+
+/* Heading */
+.signup-card h2 {
+    color: var(--text-primary);
+    text-align: center;
+    margin-bottom: 10px;
+    font-weight: 800;
+    font-size: 2.2rem;
+}
+
+.signup-subtitle {
+    color: var(--text-secondary);
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 1rem;
+}
+
+/* Form Styles */
+.form-group {
+    margin-bottom: 24px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.form-input {
+    width: 100%;
+    padding: 14px 18px;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.1);
+}
+
+.form-input::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.6;
+}
+
+/* Login Button */
+.btn-signup {
+    width: 100%;
+    padding: 16px;
+    background-color: var(--btn-primary-bg);
+    color: var(--btn-primary-text) !important;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-signup:hover {
+    background-color: var(--accent-color) !important;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(255, 0, 0, 0.3);
+    animation: pulse 1.5s infinite;
+}
+
+/* Login Section */
+.login-section {
+    text-align: center;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.login-text {
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+}
+
+.btn-login {
+    display: inline-block;
+    padding: 12px 30px;
+    background-color: transparent;
+    color: var(--text-primary);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.btn-login:hover {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .login-page {
+        padding: 15px;
+    }
+
+    .signup-card {
+        padding: 30px 25px;
+        max-width: 100%;
+    }
+
+    .signup-card h2 {
+        font-size: 1.8rem;
+    }
+
+    .signup-logo .logo-text {
+        font-size: 1.8rem;
+    }
+
+    .theme-toggle-signup-btn {
+        width: 40px;
+        height: 40px;
+        top: 15px;
+        right: 15px;
+    }
+
+    .back-to-home {
+        top: 15px;
+        left: 15px;
+        padding: 6px 12px;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .signup-card {
+        padding: 25px 20px;
+    }
+
+    .signup-card h2 {
+        font-size: 1.6rem;
+    }
+
+    .form-input {
+        padding: 12px 15px;
+    }
+
+    .btn-signup {
+        padding: 14px;
+    }
+
+    .btn-login {
+        padding: 10px 25px;
+    }
+}
+
+/* Selection Color */
+::selection {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+::-moz-selection {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+/* Smooth Scrolling */
+html {
+    scroll-behavior: smooth;
+}
