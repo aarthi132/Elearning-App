@@ -114,7 +114,7 @@ function Signup() {
             {/* Footer */}
             <footer className="signup-footer">
                 <div className="container">
-                    <p className="mb-0">© 2025 E-Learning App. All Rights Reserved.</p>
+                    <p className="mb-0">© 2026 E-Learning App. All Rights Reserved.</p>
                 </div>
             </footer>
         </div>

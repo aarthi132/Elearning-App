@@ -1,10 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import VideoModal from './VideoModal';
+import PdfViewer from './PdfViewer';
 import './MyCourses.css';
 
 function MyCourses() {
     const [myCourses, setMyCourses] = useState([]);
+    const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+    const [activeVideoUrl, setActiveVideoUrl] = useState("");
+    const [isPdfViewerOpen, setIsPdfViewerOpen] = useState(false);
+    const [activePdfUrl, setActivePdfUrl] = useState("");
+    const [activePdfTitle, setActivePdfTitle] = useState("");
+    const [isLoading, setIsLoading] = useState(true);
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
     const userId = localStorage.getItem("userId");
     const navigate = useNavigate();
 
@@ -12,7 +21,13 @@ function MyCourses() {
         if (userId) {
             axios.get('http://localhost:3001/user/' + userId)
                 .then(userResult => {
-                    const enrolledIds = userResult.data.enrolledCourses || [];
+                    const enrolledIds = userResult.data?.enrolledCourses || [];
+
+                    if (enrolledIds.length === 0) {
+                        setMyCourses([]);
+                        setIsLoading(false);
+                        return;
+                    }
 
                     axios.get('http://localhost:3001/getCourses')
                         .then(courseResult => {
@@ -21,22 +36,42 @@ function MyCourses() {
                                 enrolledIds.includes(course._id)
                             );
                             setMyCourses(filteredCourses);
+                            setIsLoading(false);
                         })
-                        .catch(err => console.log(err));
+                        .catch(err => {
+                            console.log(err);
+                            setIsLoading(false);
+                        });
                 })
-                .catch(err => console.log(err));
+                .catch(err => {
+                    console.log(err);
+                    setIsLoading(false);
+                });
+        } else {
+            setIsLoading(false);
         }
     }, [userId]);
+
+    const handleViewPdf = (e, pdfUrl, courseTitle) => {
+        e.preventDefault();
+        setActivePdfUrl(pdfUrl);
+        setActivePdfTitle(courseTitle);
+        setIsPdfViewerOpen(true);
+    };
 
     const handleDownload = (e, fileUrl, fileName) => {
         e.preventDefault();
         const backendDownloadUrl = `http://localhost:3001/download-pdf?url=${encodeURIComponent(fileUrl)}&filename=${encodeURIComponent(fileName)}`;
-        window.open(backendDownloadUrl, '_self');
+        window.open(backendDownloadUrl, '_blank');
     };
 
-    const handleLogout = () => {
+    const handleLogoutClick = () => {
+        setShowLogoutModal(true);
+    };
+
+    const handleLogoutConfirm = () => {
         localStorage.clear();
-        navigate('/');
+        navigate('/login', { replace: true });
     };
 
     return (
@@ -54,7 +89,7 @@ function MyCourses() {
                             <span className="back-icon">←</span>
                             Dashboard
                         </button>
-                        <button className="btn-logout" onClick={handleLogout}>
+                        <button className="btn-logout" onClick={handleLogoutClick}>
                             <span className="logout-icon">🚪</span>
                             Logout
                         </button>
@@ -102,7 +137,11 @@ function MyCourses() {
                             <h2 className="section-title">Your Learning Path ({myCourses.length})</h2>
                         </div>
 
-                        {myCourses.length === 0 ? (
+                        {isLoading ? (
+                            <div className="loading-state">
+                                <h3>Loading your courses...</h3>
+                            </div>
+                        ) : myCourses.length === 0 ? (
                             <div className="empty-state">
                                 <div className="empty-icon">📚</div>
                                 <h3>No courses enrolled yet</h3>
@@ -138,28 +177,29 @@ function MyCourses() {
                                             <div className="course-meta">
                                                 <span className="meta-item">⏱️ 8 Hours</span>
                                                 <span className="meta-item">📊 25% Complete</span>
-                                                <span className="meta-item">⭐ 4.5</span>
                                             </div>
 
                                             <div className="course-actions">
                                                 {course.videoUrl && (
-                                                    <a
-                                                        href={course.videoUrl}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            setActiveVideoUrl(course.videoUrl);
+                                                            setIsVideoModalOpen(true);
+                                                        }}
                                                         className="btn-course-action watch"
                                                     >
                                                         <span className="action-icon">▶️</span>
                                                         Continue Learning
-                                                    </a>
+                                                    </button>
                                                 )}
                                                 {course.pdfUrl && (
                                                     <button
-                                                        onClick={(e) => handleDownload(e, course.pdfUrl, course.title)}
+                                                        onClick={(e) => handleViewPdf(e, course.pdfUrl, course.title)}
                                                         className="btn-course-action download"
                                                     >
-                                                        <span className="action-icon">📥</span>
-                                                        Download Notes
+                                                        <span className="action-icon">📄</span>
+                                                        View PDF
                                                     </button>
                                                 )}
                                             </div>
@@ -180,6 +220,38 @@ function MyCourses() {
                     </p>
                 </div>
             </div>
+
+            {/* PDF Viewer Modal */}
+            {isPdfViewerOpen && (
+                <PdfViewer
+                    pdfUrl={activePdfUrl}
+                    courseTitle={activePdfTitle}
+                    onClose={() => setIsPdfViewerOpen(false)}
+                />
+            )}
+
+            {/* Video Modal Overlay */}
+            {isVideoModalOpen && (
+                <VideoModal
+                    videoUrl={activeVideoUrl}
+                    onClose={() => setIsVideoModalOpen(false)}
+                />
+            )}
+
+            {/* Custom Logout Modal */}
+            {showLogoutModal && (
+                <div className="logout-modal-overlay">
+                    <div className="logout-modal-content">
+                        <div className="logout-modal-icon">⚠️</div>
+                        <h2>Confirm Logout</h2>
+                        <p>Are you sure you want to log out of Your Courses?</p>
+                        <div className="logout-modal-actions">
+                            <button className="btn-cancel" onClick={() => setShowLogoutModal(false)}>Cancel</button>
+                            <button className="btn-confirm-logout" onClick={handleLogoutConfirm}>Yes, Logout</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

@@ -7,26 +7,29 @@ import Login from './Login'
 import AdminDashboard from './AdminDashboard'
 import StudentDashboard from './StudentDashboard'
 import MyCourses from './myCourses';
+import Chatbot from './Chatbot';
 
 function App() {
     return (
-        <Routes>
-            {/* 👇 MUKKIYAM: path="/" nu potta thaan, open pannathum Home varum */}
-            <Route path="/" element={<Home />}></Route>
+        <>
+            <Routes>
+                <Route path="/" element={<Home />}></Route>
 
-            {/* Auth Routes */}
-            <Route path="/signup" element={<Signup />}></Route>
-            <Route path="/register" element={<Signup />}></Route>
-            <Route path="/login" element={<Login />}></Route>
+                {/* Auth Routes */}
+                <Route path="/signup" element={<Signup />}></Route>
+                <Route path="/register" element={<Signup />}></Route>
+                <Route path="/login" element={<Login />}></Route>
 
-            {/* Dashboard Routes */}
-            <Route path="/admin/dashboard" element={<AdminDashboard />}></Route>
-            <Route path="/student/dashboard" element={<StudentDashboard />}></Route>
+                {/* Dashboard Routes */}
+                <Route path="/admin/dashboard" element={<AdminDashboard />}></Route>
+                <Route path="/student/dashboard" element={<StudentDashboard />}></Route>
 
-            {/* Course Route */}
-            <Route path="/my-courses" element={<MyCourses />}></Route>
+                {/* Course Route */}
+                <Route path="/my-courses" element={<MyCourses />}></Route>
 
-        </Routes>
+            </Routes>
+            <Chatbot />
+        </>
     )
 }
 

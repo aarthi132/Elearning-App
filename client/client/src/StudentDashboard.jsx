@@ -1,12 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import CodeEditor from './CodeEditor';
+import VideoModal from './VideoModal';
+import PdfViewer from './PdfViewer';
 import './StudentDashboard.css';
 
 function StudentDashboard() {
     const [courses, setCourses] = useState([]);
     const [enrolledCourses, setEnrolledCourses] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
+    const [isEditorOpen, setIsEditorOpen] = useState(false);
+    const [activeEditorLanguage, setActiveEditorLanguage] = useState("python");
+    const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+    const [activeVideoUrl, setActiveVideoUrl] = useState("");
+    const [isPdfViewerOpen, setIsPdfViewerOpen] = useState(false);
+    const [activePdfUrl, setActivePdfUrl] = useState("");
+    const [activePdfTitle, setActivePdfTitle] = useState("");
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
 
     const navigate = useNavigate();
     const userId = localStorage.getItem("userId");
@@ -44,10 +55,17 @@ function StudentDashboard() {
             });
     };
 
+    const handleViewPdf = (e, pdfUrl, courseTitle) => {
+        e.preventDefault();
+        setActivePdfUrl(pdfUrl);
+        setActivePdfTitle(courseTitle);
+        setIsPdfViewerOpen(true);
+    };
+
     const handleDownload = (e, fileUrl, fileName) => {
         e.preventDefault();
         const backendDownloadUrl = `http://localhost:3001/download-pdf?url=${encodeURIComponent(fileUrl)}&filename=${encodeURIComponent(fileName)}`;
-        window.open(backendDownloadUrl, '_self');
+        window.open(backendDownloadUrl, '_blank');
     };
 
     // Filter courses based on search term
@@ -56,9 +74,19 @@ function StudentDashboard() {
             course.description.toLowerCase().includes(searchTerm.toLowerCase());
     });
 
-    const handleLogout = () => {
+    const handleLogoutClick = () => {
+        setShowLogoutModal(true);
+    };
+
+    const handleLogoutConfirm = () => {
         localStorage.clear();
-        navigate('/');
+        navigate('/login', { replace: true });
+    };
+
+    const openEditor = (e, language = 'python') => {
+        e.preventDefault();
+        setActiveEditorLanguage(language);
+        setIsEditorOpen(true);
     };
 
     return (
@@ -76,7 +104,7 @@ function StudentDashboard() {
                             <span className="mycourses-icon">📚</span>
                             My Courses
                         </button>
-                        <button className="btn-logout" onClick={handleLogout}>
+                        <button className="btn-logout" onClick={handleLogoutClick}>
                             <span className="logout-icon">🚪</span>
                             Logout
                         </button>
@@ -159,23 +187,35 @@ function StudentDashboard() {
                                                 )}
 
                                                 {course.videoUrl && (
-                                                    <a
-                                                        href={course.videoUrl}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            setActiveVideoUrl(course.videoUrl);
+                                                            setIsVideoModalOpen(true);
+                                                        }}
                                                         className="btn-course-action watch"
                                                     >
                                                         <span className="action-icon">▶️</span>
                                                         Watch Video
-                                                    </a>
+                                                    </button>
                                                 )}
                                                 {course.pdfUrl && (
                                                     <button
-                                                        onClick={(e) => handleDownload(e, course.pdfUrl, course.title)}
+                                                        onClick={(e) => handleViewPdf(e, course.pdfUrl, course.title)}
                                                         className="btn-course-action download"
                                                     >
-                                                        <span className="action-icon">📥</span>
-                                                        Download Notes
+                                                        <span className="action-icon">📄</span>
+                                                        View PDF
+                                                    </button>
+                                                )}
+                                                {enrolledCourses.includes(course._id) && (
+                                                    <button
+                                                        onClick={(e) => openEditor(e, 'python')}
+                                                        className="btn-course-action run-code"
+                                                        style={{ backgroundColor: '#2d2d30', color: '#fff' }}
+                                                    >
+                                                        <span className="action-icon">👨‍💻</span>
+                                                        Run Code
                                                     </button>
                                                 )}
                                             </div>
@@ -203,13 +243,6 @@ function StudentDashboard() {
                                     <p>Your Enrollments</p>
                                 </div>
                             </div>
-                            <div className="stat-card">
-                                <div className="stat-icon">⭐</div>
-                                <div className="stat-content">
-                                    <h3>4.8</h3>
-                                    <p>Avg. Rating</p>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -223,6 +256,46 @@ function StudentDashboard() {
                     </p>
                 </div>
             </div>
+
+            {/* Code Editor Modal Overlay */}
+            {isEditorOpen && (
+                <CodeEditor
+                    onClose={() => setIsEditorOpen(false)}
+                    defaultLanguage={activeEditorLanguage}
+                />
+            )}
+
+            {/* PDF Viewer Modal */}
+            {isPdfViewerOpen && (
+                <PdfViewer
+                    pdfUrl={activePdfUrl}
+                    courseTitle={activePdfTitle}
+                    onClose={() => setIsPdfViewerOpen(false)}
+                />
+            )}
+
+            {/* Video Modal Overlay */}
+            {isVideoModalOpen && (
+                <VideoModal
+                    videoUrl={activeVideoUrl}
+                    onClose={() => setIsVideoModalOpen(false)}
+                />
+            )}
+
+            {/* Custom Logout Modal */}
+            {showLogoutModal && (
+                <div className="logout-modal-overlay">
+                    <div className="logout-modal-content">
+                        <div className="logout-modal-icon">⚠️</div>
+                        <h2>Confirm Logout</h2>
+                        <p>Are you sure you want to log out of the Student Dashboard?</p>
+                        <div className="logout-modal-actions">
+                            <button className="btn-cancel" onClick={() => setShowLogoutModal(false)}>Cancel</button>
+                            <button className="btn-confirm-logout" onClick={handleLogoutConfirm}>Yes, Logout</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

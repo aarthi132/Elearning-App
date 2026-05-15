@@ -15,6 +15,10 @@ function AdminDashboard() {
     const [image, setImage] = useState("");
     const [videoUrl, setVideoUrl] = useState("");
     const [pdfUrl, setPdfUrl] = useState("");
+    const [pdfFileName, setPdfFileName] = useState("");
+    const [pdfUploading, setPdfUploading] = useState(false);
+    const [pdfUploadSuccess, setPdfUploadSuccess] = useState(false);
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
 
     const navigate = useNavigate();
 
@@ -43,13 +47,14 @@ function AdminDashboard() {
         axios.post('http://localhost:3001/addCourse', { title, description, image, videoUrl, pdfUrl })
             .then(result => {
                 alert("Course Added Successfully!");
-                // Instead of reload, update state
                 setCourses([...courses, result.data]);
                 setTitle("");
                 setDescription("");
                 setImage("");
                 setVideoUrl("");
                 setPdfUrl("");
+                setPdfFileName("");
+                setPdfUploadSuccess(false);
                 setAnalytics({
                     ...analytics,
                     totalCourses: analytics.totalCourses + 1
@@ -57,6 +62,33 @@ function AdminDashboard() {
             })
             .catch(err => console.log(err))
     }
+
+    const handlePdfUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.type !== 'application/pdf') {
+            alert('Please select a valid PDF file!');
+            return;
+        }
+        setPdfFileName(file.name);
+        setPdfUploading(true);
+        setPdfUploadSuccess(false);
+        const formData = new FormData();
+        formData.append('pdf', file);
+        try {
+            const result = await axios.post('http://localhost:3001/uploadPdf', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            setPdfUrl(result.data.url);
+            setPdfUploadSuccess(true);
+        } catch (err) {
+            console.log(err);
+            alert('PDF Upload Failed! Please try again.');
+            setPdfFileName("");
+        } finally {
+            setPdfUploading(false);
+        }
+    };
 
     const handleDelete = (id) => {
         if (window.confirm("Are you sure you want to delete this course?")) {
@@ -79,9 +111,13 @@ function AdminDashboard() {
         window.open(backendDownloadUrl, '_self');
     };
 
-    const handleLogout = () => {
+    const handleLogoutClick = () => {
+        setShowLogoutModal(true);
+    };
+
+    const handleLogoutConfirm = () => {
         localStorage.clear();
-        navigate('/');
+        navigate('/login', { replace: true });
     };
 
     return (
@@ -95,7 +131,7 @@ function AdminDashboard() {
                     </div>
 
                     <div className="header-right">
-                        <button className="btn-logout" onClick={handleLogout}>
+                        <button className="btn-logout" onClick={handleLogoutClick}>
                             <span className="logout-icon">🚪</span>
                             Logout
                         </button>
@@ -201,14 +237,34 @@ function AdminDashboard() {
                                             />
                                         </div>
                                         <div className="form-group">
-                                            <label>Notes Link (PDF)</label>
-                                            <input
-                                                type="url"
-                                                className="form-input"
-                                                placeholder="https://drive.google.com/..."
-                                                value={pdfUrl}
-                                                onChange={(e) => setPdfUrl(e.target.value)}
-                                            />
+                                            <label>Course Notes (PDF File)</label>
+                                            <div className="pdf-upload-area">
+                                                <label className="pdf-upload-label" htmlFor="pdf-file-input">
+                                                    {pdfUploading ? (
+                                                        <>
+                                                            <span className="pdf-upload-icon">⏳</span>
+                                                            <span>Uploading PDF...</span>
+                                                        </>
+                                                    ) : pdfUploadSuccess ? (
+                                                        <>
+                                                            <span className="pdf-upload-icon">✅</span>
+                                                            <span className="pdf-upload-success">{pdfFileName}</span>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <span className="pdf-upload-icon">📎</span>
+                                                            <span>{pdfFileName || 'Click to choose PDF file'}</span>
+                                                        </>
+                                                    )}
+                                                </label>
+                                                <input
+                                                    id="pdf-file-input"
+                                                    type="file"
+                                                    accept="application/pdf"
+                                                    onChange={handlePdfUpload}
+                                                    style={{ display: 'none' }}
+                                                />
+                                            </div>
                                         </div>
                                     </div>
 
@@ -238,10 +294,6 @@ function AdminDashboard() {
                                     <div className="stat-item">
                                         <span className="stat-label">Completion Rate</span>
                                         <span className="stat-value">78%</span>
-                                    </div>
-                                    <div className="stat-item">
-                                        <span className="stat-label">Avg. Rating</span>
-                                        <span className="stat-value">4.5⭐</span>
                                     </div>
                                 </div>
                             </div>
@@ -280,11 +332,6 @@ function AdminDashboard() {
                                         <div className="course-content">
                                             <h3 className="course-title">{course.title}</h3>
                                             <p className="course-description">{course.description}</p>
-
-                                            <div className="course-meta">
-                                                <span className="meta-item">📊 125 Enrolled</span>
-                                                <span className="meta-item">⭐ 4.5</span>
-                                            </div>
 
                                             <div className="course-actions">
                                                 {course.videoUrl && (
@@ -332,6 +379,21 @@ function AdminDashboard() {
                     </p>
                 </div>
             </div>
+
+            {/* Custom Logout Modal */}
+            {showLogoutModal && (
+                <div className="logout-modal-overlay">
+                    <div className="logout-modal-content">
+                        <div className="logout-modal-icon">⚠️</div>
+                        <h2>Confirm Logout</h2>
+                        <p>Are you sure you want to log out of the Admin Dashboard?</p>
+                        <div className="logout-modal-actions">
+                            <button className="btn-cancel" onClick={() => setShowLogoutModal(false)}>Cancel</button>
+                            <button className="btn-confirm-logout" onClick={handleLogoutConfirm}>Yes, Logout</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
@@ -447,8 +509,10 @@ export default AdminDashboard;
 //     };
 
 //     const handleLogout = () => {
-//         localStorage.clear();
-//         navigate('/');
+//         if (window.confirm("Are you sure you want to logout?")) {
+//             localStorage.clear();
+//             navigate('/');
+//         }
 //     };
 
 //     return (
