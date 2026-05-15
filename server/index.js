@@ -46,12 +46,17 @@ const upload = multer({
 });
 
 // --- DATABASE CONNECTION ---
-mongoose.connect('mongodb://127.0.0.1:27017/elearning')
+mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/elearning')
     .then(() => console.log("MongoDB Connected Successfully"))
     .catch(err => console.log("DB Connection Error:", err));
 
 
 // --- ROUTES (API Endpoints) ---
+
+// Base Route for Vercel Testing
+app.get('/', (req, res) => {
+    res.json({ message: "E-Learning Backend API is running successfully!" });
+});
 
 // 1. SIGNUP API
 app.post('/signup', (req, res) => {
